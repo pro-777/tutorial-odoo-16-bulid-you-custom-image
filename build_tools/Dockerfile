@@ -1,5 +1,5 @@
 FROM odoo:16.0
-LABEL maintainer="sohaibalabad@gmail.com"
+LABEL maintainer="elhavari@gmail.com"
 USER root
 # Python libraries
 # pip3 install pyopenssl==22.0.0     
