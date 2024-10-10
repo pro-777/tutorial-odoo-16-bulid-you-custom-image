@@ -56,15 +56,6 @@ jobs:
           fi
           # Push the Docker image
           docker push "${image_name}${tag}"
-          - name: Deploy with Docker Compose
-        run: |
-          cd /opt/deployments/erp
-          COMPOSE_HTTP_TIMEOUT=200 docker-compose pull            # Pull latest images
-          COMPOSE_HTTP_TIMEOUT=200 docker-compose build           # Rebuild services if necessary
-          COMPOSE_HTTP_TIMEOUT=200 docker-compose up -d --scale web="${{ secrets.SCALE_NUMBER }}"
-          docker image prune -f --filter label=system
-          docker volume prune -f 
-
 
   stage:
     runs-on: self-hosted
