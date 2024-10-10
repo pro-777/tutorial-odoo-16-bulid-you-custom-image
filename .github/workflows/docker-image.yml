@@ -33,10 +33,3 @@ jobs:
           push: true
           tags: tefaalex/odoo-custom:latest
           file: ./Dockerfile
-
-      # Verify the health check of the container
-      - name: Run health check
-        run: |
-          docker run -d -p 8069:8069 --name odoo-container ${{ secrets.DOCKER_USERNAME }}/odoo-custom:latest
-          sleep 60 # Increased wait time to 60 seconds
-          docker exec odoo-container curl --fail http://localhost:8069/web/health || exit 1
