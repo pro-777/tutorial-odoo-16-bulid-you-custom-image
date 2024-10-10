@@ -23,7 +23,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: tefaalex
-          password: ${{ DOCKER_HUB_TOK }}
+          password: ${{ secrets.DOCKER_HUB_TOK }}
 
       # Build and push Docker image to Docker Hub
       - name: Build and push Docker image
