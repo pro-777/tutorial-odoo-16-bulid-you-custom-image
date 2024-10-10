@@ -53,7 +53,7 @@ jobs:
           docker push "${image_name}${tag}"
 
   stage:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
     if: github.ref == 'refs/heads/16.0'
     steps:
@@ -81,7 +81,7 @@ jobs:
           docker volume prune -f 
 
   production:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: stage
     if: github.ref == 'refs/heads/16.0'
     steps:
