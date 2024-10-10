@@ -1,0 +1,126 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - '16.0'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: List directory contents (for debugging)
+        run: ls -la build_tools
+
+      - name: Login to Docker Registry
+        env:
+          DOCKER_USERNAME: ${{ secrets.CI_REGISTRY_USER }}
+          DOCKER_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login "${{ secrets.CI_REGISTRY }}" --username "${DOCKER_USERNAME}" --password-stdin
+          if [ $? -ne 0 ]; then
+            echo "Docker login failed"
+            exit 1
+          fi
+
+      - name: Build Docker Image
+        id: build_image
+        run: |
+          image_name="${{ secrets.CI_REGISTRY_IMAGE }}" # Set your image name here
+          echo "Image Name: ${image_name}" # Debugging output
+          if [ "${{ github.ref }}" == "refs/heads/16.0" ]; then
+            tag="" # No tag for the latest version
+            echo "Running on branch '16.0': tag = 'latest'" 
+          else
+            tag=":latest" # Tag for other branches
+            echo "Running on branch '${{ github.ref }}': tag = $tag"
+          fi
+          # Build the Docker image
+          docker build --pull -t "${image_name}${tag}" -f build_tools/Dockerfile .
+
+      - name: List Docker Images
+        run: docker images # List images for debugging
+
+      - name: Push Docker Image
+        run: |
+          image_name="${{ secrets.CI_REGISTRY_IMAGE }}"
+          if [ "${{ github.ref }}" == "refs/heads/16.0" ]; then
+            tag="" # No tag for the latest version
+          else
+            tag=":latest" # Tag for other branches
+          fi
+          # Push the Docker image
+          docker push "${image_name}${tag}"
+
+  stage:
+    runs-on: self-hosted
+    needs: build
+    if: github.ref == 'refs/heads/16.0'
+    steps:
+      - name: Check Current Branch
+        run: echo "Current branch is: ${{ github.ref }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Registry
+        env:
+          DOCKER_USERNAME: ${{ secrets.CI_REGISTRY_USER }}
+          DOCKER_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login "${{ secrets.CI_REGISTRY }}" --username "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Pull Docker Image
+        run: |
+          image_name="${{ secrets.CI_REGISTRY_IMAGE }}"
+          tag="" # No tag for the latest version
+          echo "Running on branch '16.0': tag = 'latest'"
+          docker pull "${image_name}${tag}"
+
+      - name: Deploy with Docker Compose
+        run: |
+          cd /opt/deployments/erp-stage
+          COMPOSE_HTTP_TIMEOUT=200 docker-compose pull            # Pull latest images
+          COMPOSE_HTTP_TIMEOUT=200 docker-compose build           # Rebuild services if necessary
+          COMPOSE_HTTP_TIMEOUT=200 docker-compose up -d --scale stage_web="${{ secrets.SCALE_NUMBER_STAGE }}"
+          docker image prune -f --filter label=system
+          docker volume prune -f 
+
+  production:
+    runs-on: self-hosted
+    needs: stage
+    if: github.ref == 'refs/heads/16.0'
+    steps:
+      - name: Check Current Branch
+        run: echo "Current branch is: ${{ github.ref }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Registry
+        env:
+          DOCKER_USERNAME: ${{ secrets.CI_REGISTRY_USER }}
+          DOCKER_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login "${{ secrets.CI_REGISTRY }}" --username "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Pull Docker Image
+        run: |
+          image_name="${{ secrets.CI_REGISTRY_IMAGE }}"
+          tag="" # No tag for the latest version
+          echo "Running on branch '16.0': tag = 'latest'"
+          docker pull "${image_name}${tag}"
+
+      - name: Deploy with Docker Compose
+        run: |
+          cd /opt/deployments/erp
+          COMPOSE_HTTP_TIMEOUT=200 docker-compose pull            # Pull latest images
+          COMPOSE_HTTP_TIMEOUT=200 docker-compose build           # Rebuild services if necessary
+          COMPOSE_HTTP_TIMEOUT=200 docker-compose up -d --scale web="${{ secrets.SCALE_NUMBER }}"
+          docker image prune -f --filter label=system
+          docker volume prune -f 
