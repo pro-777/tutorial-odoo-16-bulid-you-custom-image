@@ -63,7 +63,6 @@ jobs:
     if: ${{ github.ref == 'refs/heads/16.0' }}
     steps:
       - name: Check Current Branch
-        if: ${{ github.ref == 'refs/heads/16.0' }}
         run: echo "Current branch is: $GITHUB_REF"
 
       - name: Checkout code
@@ -98,7 +97,6 @@ jobs:
     if: ${{ github.ref == 'refs/heads/16.0' }}
     steps:
       - name: Check Current Branch
-        if: ${{ github.ref == 'refs/heads/16.0' }}
         run: echo "Current branch is: $GITHUB_REF"
 
       - name: Checkout code
