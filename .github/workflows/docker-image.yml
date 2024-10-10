@@ -38,6 +38,9 @@ jobs:
           # Build the Docker image
           docker build --pull -t "${image_name}${tag}" -f build_tools/Dockerfile .
 
+      - name: List Docker Images
+        run: docker images # List images for debugging
+
       - name: Push Docker Image
         run: |
           image_name="${{ secrets.CI_REGISTRY_IMAGE }}"
