@@ -38,5 +38,5 @@ jobs:
       - name: Run health check
         run: |
           docker run -d -p 8069:8069 --name odoo-container ${{ secrets.DOCKER_USERNAME }}/odoo-custom:latest
-          sleep 10 # Wait for container to start
+          sleep 30 # Increase the wait time for the container to start
           docker exec odoo-container curl --fail http://localhost:8069/web/health || exit 1
