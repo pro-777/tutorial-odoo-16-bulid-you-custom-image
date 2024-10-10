@@ -37,4 +37,9 @@ jobs:
       - name: Push Docker Image
         run: |
           image_name="${{ secrets.CI_REGISTRY_IMAGE }}"
-          docker push "${image_name}${{ github.ref == 'refs/heads/16.0' && echo '' || echo ':latest' }}"
+          if [ "${{ github.ref }}" == "refs/heads/16.0" ]; then
+            tag="" # No tag for the latest version
+          else
+            tag=":latest" # Tag for other branches
+          fi
+          docker push "${image_name}${tag}"
