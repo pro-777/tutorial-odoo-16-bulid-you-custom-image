@@ -63,7 +63,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/16.0' }}  # Corrected line
     steps:
       - name: Check Current Branch
-        if: ${{ github.ref == 'refs/heads/16.0' }}
+        run: if: ${{ github.ref == 'refs/heads/16.0' }}
 
       - name: Checkout code
         uses: actions/checkout@v4
