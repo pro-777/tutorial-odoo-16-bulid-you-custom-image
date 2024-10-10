@@ -60,10 +60,11 @@ jobs:
   stage:
     runs-on: self-hosted
     needs: build
-    if: ${{ github.ref == 'refs/heads/16.0' }}  # Corrected line
+    if: ${{ github.ref == 'refs/heads/16.0' }}
     steps:
       - name: Check Current Branch
-        run: if: ${{ github.ref == 'refs/heads/16.0' }}
+        if: ${{ github.ref == 'refs/heads/16.0' }}
+        run: echo "Current branch is: $GITHUB_REF"
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -97,8 +98,8 @@ jobs:
     if: ${{ github.ref == 'refs/heads/16.0' }}
     steps:
       - name: Check Current Branch
-        run: |
-          echo "Current branch is: $GITHUB_REF"
+        if: ${{ github.ref == 'refs/heads/16.0' }}
+        run: echo "Current branch is: $GITHUB_REF"
 
       - name: Checkout code
         uses: actions/checkout@v4
