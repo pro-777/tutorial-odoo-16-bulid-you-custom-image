@@ -60,7 +60,7 @@ jobs:
   stage:
     runs-on: self-hosted
     needs: build
-    if: ${{ github.ref == 'refs/heads/16.0' }}
+    if: ${{ github.ref == 'refs/heads/16.0' }}  # Corrected line
     steps:
       - name: Check Current Branch
         run: echo "Current branch is: $GITHUB_REF"
