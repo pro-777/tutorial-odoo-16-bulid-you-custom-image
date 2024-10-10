@@ -63,7 +63,8 @@ jobs:
     if: github.ref == 'refs/heads/16.0'
     steps:
       - name: Check Current Branch
-        run: echo "Current branch is: ${GITHUB_REF}"
+        run: |
+          echo "Current branch is: $GITHUB_REF"
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -97,7 +98,8 @@ jobs:
     if: github.ref == 'refs/heads/16.0'
     steps:
       - name: Check Current Branch
-        run: echo "Current branch is: ${GITHUB_REF}"
+        run: |
+          echo "Current branch is: $GITHUB_REF"
 
       - name: Checkout code
         uses: actions/checkout@v4
